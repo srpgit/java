@@ -1,6 +1,7 @@
 package org.primesoft.common.base.tools.json;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import com.alibaba.fastjson.JSONArray;
@@ -98,6 +99,15 @@ public class EasyJSON {
 	}
 
 	/**
+	 * 返回所有节点的key，a.b.c形式。配合get(String)方法可取所有属性值
+	 * 
+	 * @return a.b.c
+	 */
+	public List<String> getAllNodes() {
+		return getAllNodes(json);
+	}
+
+	/**
 	 * 使用 a.b.c的形式获取属性。若结构不对或出现不可预料的异常，会打印异常并返回空
 	 * 
 	 * @param input js点形式的字符串
@@ -184,5 +194,43 @@ public class EasyJSON {
 			list.add(String.valueOf(o));
 		}
 		return list;
+	}
+
+	/**
+	 * 返回所有节点的key，a.b.c形式。配合get(String)方法可取所有属性值
+	 * 
+	 * @return a.b.c
+	 */
+	public static List<String> getAllNodes(JSONObject json) {
+		if (json == null) {
+			return new ArrayList<String>(0);
+		}
+		return getNodes(json, null);
+	}
+
+	private static List<String> getNodes(JSONObject jo, String pStr) {
+		if (jo == null) {
+			return new ArrayList<String>(0);
+		}
+
+		if (pStr == null || pStr.length() == 0) {
+			pStr = "";
+		} else {
+			pStr += ".";
+		}
+
+		List<String> result = new ArrayList<String>(jo.size());
+
+		Iterator<String> it = jo.keySet().iterator();
+		while (it.hasNext()) {
+			String key = it.next();
+			Object value = jo.get(key);
+			if (value instanceof JSONObject) {
+				result.addAll(getNodes((JSONObject) value, pStr + key));
+			} else {
+				result.add(pStr + key);
+			}
+		}
+		return result;
 	}
 }
